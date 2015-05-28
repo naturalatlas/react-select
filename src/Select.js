@@ -269,7 +269,7 @@ var Select = React.createClass({
 			if (typeof values === 'string') {
 				values = values === ''
 					? []
-					: this.props.multi 
+					: this.props.multi
 						? values.split(this.props.delimiter)
 						: [ values ];
 			} else {
