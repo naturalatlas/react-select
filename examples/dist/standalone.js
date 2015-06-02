@@ -98,6 +98,7 @@ var Select = React.createClass({
 		filterOption: React.PropTypes.func, // method to filter a single option: function(option, filterString)
 		filterOptions: React.PropTypes.func, // method to filter the options array: function([options], filterString, [values])
 		ignoreCase: React.PropTypes.bool, // whether to perform case-insensitive filtering
+		initialOptions: React.PropTypes.array, // to be used in conjunction with asyncOptions
 		inputProps: React.PropTypes.object, // custom attributes for the Input (in the Select-control) e.g: {'data-foo': 'bar'}
 		matchPos: React.PropTypes.string, // (any|start) match the start or entire string when filtering
 		matchProp: React.PropTypes.string, // (any|label|value) which option property to filter on
@@ -170,6 +171,7 @@ var Select = React.createClass({
     * - placeholder
     * - focusedOption
    */
+			options: this.props.initialOptions || this.props.options,
 			isFocused: false,
 			isLoading: false,
 			isOpen: false,
