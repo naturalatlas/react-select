@@ -14,6 +14,7 @@ var Select = React.createClass({
 		multi: React.PropTypes.bool,               // multi-value input
 		disabled: React.PropTypes.bool,            // whether the Select is disabled or not
 		options: React.PropTypes.array,            // array of options
+		initialOptions: React.PropTypes.array,     // to be used in conjunction with asyncOptions
 		delimiter: React.PropTypes.string,         // delimiter to use to join multiple values
 		asyncOptions: React.PropTypes.func,        // function to call to get options
 		autoload: React.PropTypes.bool,            // whether to auto-load the default async options set
@@ -85,7 +86,7 @@ var Select = React.createClass({
 			 * - placeholder
 			 * - focusedOption
 			*/
-			options: this.props.options,
+			options: this.props.initialOptions || this.props.options,
 			isFocused: false,
 			isOpen: false,
 			isLoading: false
@@ -131,7 +132,7 @@ var Select = React.createClass({
 				document.removeEventListener('click', this._closeMenuIfClickedOutside);
 			}
 		};
-    
+
 		this.setState(this.getStateFromValue(this.props.value),function(){
 		  //Executes after state change is done. Fixes issue #201
 		  if (this.props.asyncOptions && this.props.autoload) {
@@ -379,7 +380,7 @@ var Select = React.createClass({
 
 			case 13: // enter
 				if (!this.state.isOpen) return
-				
+
 				this.selectFocusedOption();
 			break;
 
