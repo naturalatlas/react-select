@@ -929,7 +929,7 @@ var Select = React.createClass({
 		return React.createElement(
 			'div',
 			{ ref: 'wrapper', className: selectClass },
-			React.createElement('input', { type: 'hidden', ref: 'value', name: this.props.name, value: this.state.value, disabled: this.props.disabled }),
+			React.createElement('input', _extends({ type: 'hidden', ref: 'value', name: this.props.name, value: this.state.value, disabled: this.props.disabled }, this.props.inputProps)),
 			React.createElement(
 				'div',
 				{ className: 'Select-control', ref: 'control', onKeyDown: this.handleKeyDown, onMouseDown: this.handleMouseDown, onTouchEnd: this.handleMouseDown },
