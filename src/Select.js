@@ -30,6 +30,7 @@ var Select = React.createClass({
 		disabled: React.PropTypes.bool,            // whether the Select is disabled or not
 		filterOption: React.PropTypes.func,        // method to filter a single option: function(option, filterString)
 		filterOptions: React.PropTypes.func,       // method to filter the options array: function([options], filterString, [values])
+		hiddenInputProps: React.PropTypes.object,  // props to apply to hidden input
 		ignoreCase: React.PropTypes.bool,          // whether to perform case-insensitive filtering
 		initialOptions: React.PropTypes.array,     // to be used in conjunction with asyncOptions
 		inputProps: React.PropTypes.object,        // custom attributes for the Input (in the Select-control) e.g: {'data-foo': 'bar'}
@@ -71,6 +72,7 @@ var Select = React.createClass({
 			clearable: true,
 			delimiter: ',',
 			disabled: false,
+			hiddenInputProps: {},
 			ignoreCase: true,
 			inputProps: {},
 			matchPos: 'any',
@@ -845,7 +847,7 @@ var Select = React.createClass({
 
 		return (
 			<div ref="wrapper" className={selectClass}>
-				<input type="hidden" ref="value" name={this.props.name} value={this.state.value} disabled={this.props.disabled} {...this.props.inputProps} />
+				<input type="hidden" ref="value" name={this.props.name} value={this.state.value} disabled={this.props.disabled} {...this.props.hiddenInputProps} />
 				<div className="Select-control" ref="control" onKeyDown={this.handleKeyDown} onMouseDown={this.handleMouseDown} onTouchEnd={this.handleMouseDown}>
 					{value}
 					{input}
