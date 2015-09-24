@@ -163,12 +163,12 @@ var Select = React.createClass({
 	},
 
 	getInitialState: function getInitialState() {
-		var initialState = this.getStateFromValue(this.props.value);
-		initialState.options = this.props.initialOptions || this.props.options;
+		var options = this.props.initialOptions || this.props.options;
+		var initialState = this.getStateFromValue(this.props.value, options);
+		initialState.options = options;
 		initialState.isFocused = false;
 		initialState.isLoading = false;
 		initialState.isOpen = false;
-		initialState.options = this.props.options;
 		return initialState;
 	},
 
