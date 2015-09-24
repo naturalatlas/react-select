@@ -53,7 +53,7 @@ var Select = React.createClass({
 		searchingText: React.PropTypes.string,     // message to display whilst options are loading via asyncOptions
 		searchPromptText: React.PropTypes.string,  // label to prompt for search input
 		singleValueComponent: React.PropTypes.func,// single value component when multiple is set to false
-		value: React.PropTypes.any,                // initial field value
+		value: React.PropTypes.any.required,       // initial field value
 		valueComponent: React.PropTypes.func,      // value component to render in multiple mode
 		valueRenderer: React.PropTypes.func        // valueRenderer: function(option) {}
 	},
@@ -96,7 +96,7 @@ var Select = React.createClass({
 	},
 
 	getInitialState: function() {
-		var options = this.props.initialOptions || this.props.options;
+		var options = this.props.initialOptions || this.props.options || [];
 		var initialState = this.getStateFromValue(this.props.value, options);
 		initialState.options = options;
 		initialState.isFocused = false;
@@ -141,6 +141,16 @@ var Select = React.createClass({
 		};
 	},
 
+	getValues: function(value) {
+		var value = arguments.length > 0 ? value : this.props.value;
+		if (!value) return [];
+		return Array.isArray(value) ? value : [value];
+	},
+
+	getFormValue: function(values) {
+		return values.map(function(op) { return op.value; }).join(this.props.delimiter);
+	},
+
 	componentDidMount: function() {
 		if (this.props.asyncOptions && this.props.autoload) {
 			this.autoloadAsyncOptions();
@@ -164,7 +174,7 @@ var Select = React.createClass({
 				filteredOptions: this.filterOptions(newProps.options)
 			});
 		}
-		if (newProps.value !== this.state.value || newProps.placeholder !== this.props.placeholder || optionsChanged) {
+		if (newProps.value !== this.props.value || newProps.placeholder !== this.props.placeholder || optionsChanged) {
 			var setState = (newState) => {
 				this.setState(this.getStateFromValue(newProps.value,
 					(newState && newState.options) || newProps.options,
@@ -172,7 +182,8 @@ var Select = React.createClass({
 				);
 			};
 			if (this.props.asyncOptions) {
-				this.loadAsyncOptions(newProps.value, {}, setState);
+				var values = this.getValues(newProps.value);
+				this.loadAsyncOptions((values[0] && values[0].value) || '', {}, setState);
 			} else {
 				setState();
 			}
@@ -225,23 +236,17 @@ var Select = React.createClass({
 
 		// reset internal filter string
 		this._optionsFilterString = '';
-
-		var values = this.initValuesArray(value, options);
+		var values = this.getValues(value);
 		var filteredOptions = this.filterOptions(options, values);
 
-		var focusedOption;
-		var valueForState = null;
+		var focusedOption = null;
 		if (!this.props.multi && values.length) {
-			focusedOption = values[0];
-			valueForState = values[0].value;
+			focusedOption = value[0];
 		} else {
 			focusedOption = this.getFirstFocusableOption(filteredOptions);
-			valueForState = values.map(function(v) { return v.value; }).join(this.props.delimiter);
 		}
 
 		return {
-			value: valueForState,
-			values: values,
 			inputValue: '',
 			filteredOptions: filteredOptions,
 			placeholder: !this.props.multi && values.length ? values[0].label : placeholder,
@@ -250,43 +255,11 @@ var Select = React.createClass({
 	},
 
 	getFirstFocusableOption: function (options) {
-
 		for (var optionIndex = 0; optionIndex < options.length; ++optionIndex) {
 			if (!options[optionIndex].disabled) {
 				return options[optionIndex];
 			}
 		}
-	},
-
-	initValuesArray: function(values, options) {
-		if (!Array.isArray(values)) {
-			if (typeof values === 'string') {
-				values = values === ''
-					? []
-					: this.props.multi
-						? values.split(this.props.delimiter)
-						: [ values ];
-			} else {
-				values = values !== undefined && values !== null ? [values] : [];
-			}
-		}
-		return values.map(function(val) {
-			if (typeof val === 'string' || typeof val === 'number') {
-				for (var key in options) {
-					if (options.hasOwnProperty(key) &&
-						options[key] &&
-						(options[key].value === val ||
-							typeof options[key].value === 'number' &&
-							options[key].value.toString() === val
-						)) {
-						return options[key];
-					}
-				}
-				return { value: val, label: val };
-			} else {
-				return val;
-			}
-		});
 	},
 
 	setValue: function(value, focusAfterUpdate) {
@@ -295,7 +268,9 @@ var Select = React.createClass({
 		}
 		var newState = this.getStateFromValue(value);
 		newState.isOpen = false;
-		this.fireChangeEvent(newState);
+		if (value !== this.props.value && this.props.onChange) {
+			this.props.onChange(value);
+		}
 		this.setState(newState);
 	},
 
@@ -309,15 +284,16 @@ var Select = React.createClass({
 	},
 
 	addValue: function(value) {
-		this.setValue(this.state.values.concat(value));
+		this.setValue(this.getValues().concat(value));
 	},
 
 	popValue: function() {
-		this.setValue(this.state.values.slice(0, this.state.values.length - 1));
+		var values = this.getValues();
+		this.setValue(values.slice(0, values.length - 1));
 	},
 
 	removeValue: function(valueToRemove) {
-		this.setValue(this.state.values.filter(function(value) {
+		this.setValue(this.getValues().filter(function(value) {
 			return value !== valueToRemove;
 		}));
 	},
@@ -333,19 +309,9 @@ var Select = React.createClass({
 		this.setValue(null);
 	},
 
-	resetValue: function() {
-		this.setValue(this.state.value === '' ? null : this.state.value);
-	},
-
 	getInputNode: function () {
 		var input = this.refs.input;
 		return this.props.searchable ? input : React.findDOMNode(input);
-	},
-
-	fireChangeEvent: function(newState) {
-		if (newState.value !== this.state.value && this.props.onChange) {
-			this.props.onChange(newState.value, newState.values);
-		}
 	},
 
 	handleMouseDown: function(event) {
@@ -445,9 +411,7 @@ var Select = React.createClass({
 				this.selectFocusedOption();
 			break;
 			case 27: // escape
-				if (this.state.isOpen) {
-					this.resetValue();
-				} else if (this.props.clearable) {
+				if (!this.state.isOpen && this.props.clearable) {
 					this.clearValue(event);
 				}
 			break;
@@ -515,7 +479,8 @@ var Select = React.createClass({
 		this.setState({
 			isLoading: true
 		});
-		this.loadAsyncOptions((this.props.value || ''), { isLoading: false }, () => {
+		var values = this.getValues();
+		this.loadAsyncOptions((values[0] && values[0].value) || '', { isLoading: false }, () => {
 			// update with fetched but don't focus
 			this.setValue(this.props.value, false);
 		});
@@ -572,9 +537,10 @@ var Select = React.createClass({
 
 	filterOptions: function(options, values) {
 		var filterValue = this._optionsFilterString;
-		var exclude = (values || this.state.values).map(function(i) {
+		var exclude = this.getValues(values).map(function(i) {
 			return i.value;
 		});
+
 		if (this.props.filterOptions) {
 			return this.props.filterOptions.call(this, options, filterValue, exclude);
 		} else {
@@ -748,6 +714,7 @@ var Select = React.createClass({
 	},
 
 	render: function() {
+		var values = this.getValues();
 		var selectClass = classes('Select', this.props.className, {
 			'is-multi': this.props.multi,
 			'is-searchable': this.props.searchable,
@@ -755,11 +722,17 @@ var Select = React.createClass({
 			'is-focused': this.state.isFocused,
 			'is-loading': this.state.isLoading,
 			'is-disabled': this.props.disabled,
-			'has-value': this.state.value
+			'has-value': values.length
 		});
-		var value = [];
-		if (this.props.multi) {
-			this.state.values.forEach(function(val) {
+
+		var valueElements = [];
+		var SingleValueComponent = this.props.singleValueComponent;
+		var ValueComponent = this.props.valueComponent;
+
+		if (!values.length || this.state.inputValue || !this.props.multi) {
+			valueElements.push(<SingleValueComponent key="placeholder" value={values[0]} placeholder={this.state.placeholder} />);
+		} else {
+			values.forEach(function(val) {
 				var onOptionLabelClick = this.handleOptionLabelClick.bind(this, val);
 				var onRemove = this.removeValue.bind(this, val);
 				var valueComponent = React.createElement(this.props.valueComponent, {
@@ -771,26 +744,8 @@ var Select = React.createClass({
 					onRemove: onRemove,
 					disabled: this.props.disabled
 				});
-				value.push(valueComponent);
+				valueElements.push(valueComponent);
 			}, this);
-		}
-
-		if (!this.state.inputValue && (!this.props.multi || !value.length)) {
-			var val = this.state.values[0] || null;
-			if (this.props.valueRenderer && !!this.state.values.length) {
-				value.push(<Value
-						key={0}
-						option={val}
-						renderer={this.props.valueRenderer}
-						disabled={this.props.disabled} />);
-			} else {
-				var singleValueComponent = React.createElement(this.props.singleValueComponent, {
-					key: 'placeholder',
-					value: val,
-					placeholder: this.state.placeholder
-				});
-				value.push(singleValueComponent);
-			}
 		}
 
 		var loading = this.state.isLoading ? <span className="Select-loading" aria-hidden="true" /> : null;
@@ -831,15 +786,15 @@ var Select = React.createClass({
 			} else {
 				input = <div {...inputProps}>&nbsp;</div>;
 			}
-		} else if (!this.props.multi || !this.state.values.length) {
+		} else if (!this.props.multi || !values.length) {
 			input = <div className="Select-input">&nbsp;</div>;
 		}
 
 		return (
 			<div ref="wrapper" className={selectClass}>
-				<input type="hidden" ref="value" name={this.props.name} value={this.state.value} disabled={this.props.disabled} {...this.props.hiddenInputProps} />
+				<input type="hidden" ref="value" name={this.props.name} value={this.getFormValue(values)} disabled={this.props.disabled} {...this.props.hiddenInputProps} />
 				<div className="Select-control" ref="control" onKeyDown={this.handleKeyDown} onMouseDown={this.handleMouseDown} onTouchEnd={this.handleMouseDown}>
-					{value}
+					{valueElements}
 					{input}
 					<span className="Select-arrow-zone" onMouseDown={this.handleMouseDownOnArrow} />
 					<span className="Select-arrow" onMouseDown={this.handleMouseDownOnArrow} />

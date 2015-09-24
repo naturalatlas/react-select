@@ -7,6 +7,12 @@ var RemoteSelectField = React.createClass({
 		hint: React.PropTypes.string,
 		label: React.PropTypes.string,
 	},
+	getInitialState() {
+		return {selection: []};
+	},
+	onChange(value) {
+		this.setState({selection: value});
+	},
 	loadOptions (input, callback) {
 		input = input.toLowerCase();
 		var rtn = {
@@ -55,7 +61,7 @@ var RemoteSelectField = React.createClass({
 		return (
 			<div className="section">
 				<h3 className="section-heading">{this.props.label}</h3>
-				<Select asyncOptions={this.loadOptions} className="remote-example" />
+				<Select asyncOptions={this.loadOptions} className="remote-example" value={this.state.selection} onChange={this.onChange} />
 				{this.renderHint()}
 			</div>
 		);

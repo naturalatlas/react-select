@@ -381,6 +381,12 @@ var RemoteSelectField = _react2['default'].createClass({
 		hint: _react2['default'].PropTypes.string,
 		label: _react2['default'].PropTypes.string
 	},
+	getInitialState: function getInitialState() {
+		return { selection: [] };
+	},
+	onChange: function onChange(value) {
+		this.setState({ selection: value });
+	},
 	loadOptions: function loadOptions(input, callback) {
 		input = input.toLowerCase();
 		var rtn = {
@@ -424,7 +430,7 @@ var RemoteSelectField = _react2['default'].createClass({
 				{ className: 'section-heading' },
 				this.props.label
 			),
-			_react2['default'].createElement(_reactSelect2['default'], { asyncOptions: this.loadOptions, className: 'remote-example' }),
+			_react2['default'].createElement(_reactSelect2['default'], { asyncOptions: this.loadOptions, className: 'remote-example', value: this.state.selection, onChange: this.onChange }),
 			this.renderHint()
 		);
 	}
@@ -457,6 +463,12 @@ var SelectedValuesField = _react2['default'].createClass({
 		label: _react2['default'].PropTypes.string,
 		options: _react2['default'].PropTypes.array
 	},
+	getInitialState: function getInitialState() {
+		return { selection: this.props.options.slice(1, 3) };
+	},
+	onChange: function onChange(value) {
+		this.setState({ selection: value });
+	},
 	onLabelClick: function onLabelClick(data, event) {
 		console.log(data, event);
 	},
@@ -480,7 +492,7 @@ var SelectedValuesField = _react2['default'].createClass({
 			_react2['default'].createElement(_reactSelect2['default'], {
 				allowCreate: this.props.allowCreate,
 				onOptionLabelClick: this.onLabelClick,
-				value: this.props.options.slice(1, 3),
+				value: this.state.selection,
 				multi: true,
 				placeholder: 'Select your favourite(s)',
 				options: this.props.options,
@@ -508,10 +520,6 @@ var _reactSelect2 = _interopRequireDefault(_reactSelect);
 var STATES = require('../data/states');
 var id = 0;
 
-function logChange() {
-	console.log.apply(console, [].concat(['Select value changed:'], Array.prototype.slice.apply(arguments)));
-}
-
 var StatesField = _react2['default'].createClass({
 	displayName: 'StatesField',
 	propTypes: {
@@ -530,19 +538,19 @@ var StatesField = _react2['default'].createClass({
 			disabled: false,
 			searchable: this.props.searchable,
 			id: ++id,
-			selectValue: 'new-south-wales'
+			selectValue: STATES[0]
 		};
 	},
 	switchCountry: function switchCountry(e) {
 		var newCountry = e.target.value;
-		console.log('Country changed to ' + newCountry);
+		console.log('Country changed to', newCountry);
 		this.setState({
 			country: newCountry,
 			selectValue: null
 		});
 	},
 	updateValue: function updateValue(newValue) {
-		logChange('State changed to ' + newValue);
+		console.log('State changed to', newValue);
 		this.setState({
 			selectValue: newValue || null
 		});
@@ -655,6 +663,12 @@ var UsersField = _react2['default'].createClass({
 		hint: _react2['default'].PropTypes.string,
 		label: _react2['default'].PropTypes.string
 	},
+	getInitialState: function getInitialState() {
+		return { selection: [] };
+	},
+	onChange: function onChange(selection) {
+		this.setState({ selection: selection });
+	},
 	renderHint: function renderHint() {
 		if (!this.props.hint) return null;
 		return _react2['default'].createElement(
@@ -664,7 +678,6 @@ var UsersField = _react2['default'].createClass({
 		);
 	},
 	render: function render() {
-
 		return _react2['default'].createElement(
 			'div',
 			{ className: 'section' },
@@ -674,7 +687,8 @@ var UsersField = _react2['default'].createClass({
 				this.props.label
 			),
 			_react2['default'].createElement(_reactSelect2['default'], {
-				onOptionLabelClick: this.onLabelClick,
+				onChange: this.onChange,
+				value: this.state.selection,
 				placeholder: 'Select user',
 				optionComponent: _CustomOption2['default'],
 				singleValueComponent: _CustomSingleValue2['default'],

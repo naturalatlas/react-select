@@ -13,6 +13,12 @@ var SelectedValuesField = React.createClass({
 		label: React.PropTypes.string,
 		options: React.PropTypes.array,
 	},
+	getInitialState() {
+		return {selection: this.props.options.slice(1,3)};
+	},
+	onChange(value) {
+		this.setState({selection: value});
+	},
 	onLabelClick (data, event) {
 		console.log(data, event);
 	},
@@ -29,7 +35,7 @@ var SelectedValuesField = React.createClass({
 				<Select
 					allowCreate={this.props.allowCreate}
 					onOptionLabelClick={this.onLabelClick}
-					value={this.props.options.slice(1,3)}
+					value={this.state.selection}
 					multi={true}
 					placeholder="Select your favourite(s)"
 					options={this.props.options}

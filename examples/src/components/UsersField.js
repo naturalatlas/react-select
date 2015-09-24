@@ -10,6 +10,12 @@ var UsersField = React.createClass({
 		hint: React.PropTypes.string,
 		label: React.PropTypes.string,
 	},
+	getInitialState () {
+		return {selection: []};
+	},
+	onChange (selection) {
+		this.setState({selection: selection});
+	},
 	renderHint () {
 		if (!this.props.hint) return null;
 		return (
@@ -17,12 +23,12 @@ var UsersField = React.createClass({
 		);
 	},
 	render () {
-
 		return (
 			<div className="section">
 				<h3 className="section-heading">{this.props.label}</h3>
 				<Select
-					onOptionLabelClick={this.onLabelClick}
+					onChange={this.onChange}
+					value={this.state.selection}
 					placeholder="Select user"
 					optionComponent={GravatarOption}
 					singleValueComponent={GravatarValue}
