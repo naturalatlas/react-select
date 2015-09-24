@@ -324,8 +324,8 @@ var MultiSelectField = _react2['default'].createClass({
 			value: []
 		};
 	},
-	handleSelectChange: function handleSelectChange(value, values) {
-		logChange('New value:', value, 'Values:', values);
+	handleSelectChange: function handleSelectChange(value) {
+		logChange('New value:', value);
 		this.setState({ value: value });
 	},
 	toggleDisabled: function toggleDisabled(e) {

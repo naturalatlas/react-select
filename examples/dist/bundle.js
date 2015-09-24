@@ -918,27 +918,27 @@ var Select = React.createClass({
 			'has-value': values.length
 		});
 
-		var valueElements = [];
+		var valueElements;
 		var SingleValueComponent = this.props.singleValueComponent;
 		var ValueComponent = this.props.valueComponent;
 
-		if (!values.length || this.state.inputValue || !this.props.multi) {
-			valueElements.push(React.createElement(SingleValueComponent, { key: 'placeholder', value: values[0], placeholder: this.state.placeholder }));
-		} else {
-			values.forEach(function (val) {
-				var onOptionLabelClick = this.handleOptionLabelClick.bind(this, val);
-				var onRemove = this.removeValue.bind(this, val);
-				var valueComponent = React.createElement(this.props.valueComponent, {
-					key: val.value,
-					option: val,
-					renderer: this.props.valueRenderer,
-					optionLabelClick: !!this.props.onOptionLabelClick,
-					onOptionLabelClick: onOptionLabelClick,
-					onRemove: onRemove,
-					disabled: this.props.disabled
-				});
-				valueElements.push(valueComponent);
-			}, this);
+		if (!this.state.inputValue) {
+			if (!values.length || !this.props.multi) {
+				valueElements = React.createElement(SingleValueComponent, { key: 'placeholder', value: values[0], placeholder: this.state.placeholder });
+			} else {
+				valueElements = values.map(function (val) {
+					var onOptionLabelClick = this.handleOptionLabelClick.bind(this, val);
+					var onRemove = this.removeValue.bind(this, val);
+					return React.createElement(ValueComponent, {
+						key: val.value,
+						option: val,
+						renderer: this.props.valueRenderer,
+						optionLabelClick: !!this.props.onOptionLabelClick,
+						onOptionLabelClick: onOptionLabelClick,
+						onRemove: onRemove,
+						disabled: this.props.disabled });
+				}, this);
+			}
 		}
 
 		var loading = this.state.isLoading ? React.createElement('span', { className: 'Select-loading', 'aria-hidden': 'true' }) : null;
